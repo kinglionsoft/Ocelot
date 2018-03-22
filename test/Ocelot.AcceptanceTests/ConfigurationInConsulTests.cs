@@ -4,16 +4,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using Ocelot.Configuration;
-using Ocelot.Configuration.Builder;
 using Ocelot.Configuration.File;
+using Shouldly;
 using TestStack.BDDfy;
 using Xunit;
+using static Ocelot.Infrastructure.Wait;
 
 namespace Ocelot.AcceptanceTests
 {
@@ -40,8 +39,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51779,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51779,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -79,8 +84,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51779,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51779,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -133,8 +144,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/status",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51779,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51779,
+                            }
+                        },
                         UpstreamPathTemplate = "/cs/status",
                         UpstreamHttpMethod = new List<string> {"Get"}
                     }
@@ -159,7 +176,6 @@ namespace Ocelot.AcceptanceTests
                 .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
                 .BDDfy();
         }
-
 
         [Fact]
         public void should_load_configuration_out_of_consul_if_it_is_changed()
@@ -187,8 +203,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/status",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51779,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51780,
+                            }
+                        },
                         UpstreamPathTemplate = "/cs/status",
                         UpstreamHttpMethod = new List<string> {"Get"}
                     }
@@ -211,8 +233,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/status",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51779,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51780,
+                            }
+                        },
                         UpstreamPathTemplate = "/cs/status/awesome",
                         UpstreamHttpMethod = new List<string> {"Get"}
                     }
@@ -229,23 +257,33 @@ namespace Ocelot.AcceptanceTests
 
             this.Given(x => GivenTheConsulConfigurationIs(consulConfig))
                 .And(x => GivenThereIsAFakeConsulServiceDiscoveryProvider(fakeConsulServiceDiscoveryUrl))
-                .And(x => x.GivenThereIsAServiceRunningOn("http://localhost:51779", "/status", 200, "Hello from Laura"))
+                .And(x => x.GivenThereIsAServiceRunningOn("http://localhost:51780", "/status", 200, "Hello from Laura"))
                 .And(x => _steps.GivenThereIsAConfiguration(configuration))
                 .And(x => _steps.GivenOcelotIsRunningUsingConsulToStoreConfig())
                 .And(x => _steps.WhenIGetUrlOnTheApiGateway("/cs/status"))
                 .And(x => _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK))
                 .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
-                .And(x => GivenTheConsulConfigurationIs(secondConsulConfig))
-                .And(x => GivenIWaitForTheConfigToReplicateToOcelot())
-                .When(x => _steps.WhenIGetUrlOnTheApiGateway("/cs/status/awesome"))
-                .Then(x => _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK))
-                .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
+                .When(x => GivenTheConsulConfigurationIs(secondConsulConfig))
+                .Then(x => ThenTheConfigIsUpdatedInOcelot())
                 .BDDfy();
         }
 
-        private void GivenIWaitForTheConfigToReplicateToOcelot()
+        private void ThenTheConfigIsUpdatedInOcelot()
         {
-            Thread.Sleep(10000);
+            var result = WaitFor(20000).Until(() => {
+                try
+                {
+                    _steps.WhenIGetUrlOnTheApiGateway("/cs/status/awesome");
+                    _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK);
+                    _steps.ThenTheResponseBodyShouldBe("Hello from Laura");
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            });
+            result.ShouldBeTrue();
         }
 
         private void GivenTheConsulConfigurationIs(FileConfiguration config)
@@ -276,8 +314,7 @@ namespace Ocelot.AcceptanceTests
                                         var kvp = new FakeConsulGetResponse(base64);
 
                                         await context.Response.WriteJsonAsync(new FakeConsulGetResponse[] { kvp });
-                                    }
-
+                                    }                               
                                     else if (context.Request.Method.ToLower() == "put" && context.Request.Path.Value == "/v1/kv/OcelotConfiguration")
                                     {
                                         try

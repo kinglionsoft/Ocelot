@@ -20,6 +20,38 @@ namespace Ocelot.UnitTests.Configuration
         }
 
         [Fact]
+        public void should_use_re_route_priority()
+        {
+            var fileReRoute = new FileReRoute
+            {
+                UpstreamPathTemplate = "/orders/{catchAll}",
+                Priority = 0
+            };
+
+            this.Given(x => x.GivenTheFollowingFileReRoute(fileReRoute))
+                .When(x => x.WhenICreateTheTemplatePattern())
+                .Then(x => x.ThenTheFollowingIsReturned("^(?i)/orders/[0-9a-zA-Z].*$"))
+                .And(x => ThenThePriorityIs(0))
+                .BDDfy();
+        }
+
+        [Fact]
+        public void should_use_zero_priority()
+        {
+            var fileReRoute = new FileReRoute
+            {
+                UpstreamPathTemplate = "/{catchAll}",
+                Priority = 1
+            };
+
+            this.Given(x => x.GivenTheFollowingFileReRoute(fileReRoute))
+                .When(x => x.WhenICreateTheTemplatePattern())
+                .Then(x => x.ThenTheFollowingIsReturned("^/.*"))
+                .And(x => ThenThePriorityIs(0))
+                .BDDfy();
+        }
+
+        [Fact]
         public void should_set_upstream_template_pattern_to_ignore_case_sensitivity()
         {
             var fileReRoute = new FileReRoute
@@ -34,7 +66,6 @@ namespace Ocelot.UnitTests.Configuration
                 .And(x => ThenThePriorityIs(1))
                 .BDDfy();
         }
-
 
         [Fact]
         public void should_match_forward_slash_or_no_forward_slash_if_template_end_with_forward_slash()
@@ -70,7 +101,7 @@ namespace Ocelot.UnitTests.Configuration
         [Fact]
         public void should_create_template_pattern_that_matches_anything_to_end_of_string()
         {
-            var fileReRoute =  new FileReRoute
+            var fileReRoute = new FileReRoute
             {
                 UpstreamPathTemplate = "/api/products/{productId}",
                 ReRouteIsCaseSensitive = true

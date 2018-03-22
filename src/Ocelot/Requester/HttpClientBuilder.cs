@@ -1,39 +1,70 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
+using Ocelot.Configuration;
 using Ocelot.Logging;
-using Ocelot.Requester.QoS;
+using Ocelot.Middleware;
 
 namespace Ocelot.Requester
 {
-    internal class HttpClientBuilder : IHttpClientBuilder
+    public class HttpClientBuilder : IHttpClientBuilder
     {
-        private readonly Dictionary<int, Func<DelegatingHandler>> _handlers = new Dictionary<int, Func<DelegatingHandler>>();
+        private readonly IDelegatingHandlerHandlerFactory _factory;
+        private readonly IHttpClientCache _cacheHandlers;
+        private readonly IOcelotLogger _logger;
+        private string _cacheKey;
+        private HttpClient _httpClient;
+        private IHttpClient _client;
+        private HttpClientHandler _httpclientHandler;
 
-        public  IHttpClientBuilder WithQos(IQoSProvider qosProvider, IOcelotLogger logger)
+        public HttpClientBuilder(
+            IDelegatingHandlerHandlerFactory factory, 
+            IHttpClientCache cacheHandlers, 
+            IOcelotLogger logger)
         {
-            _handlers.Add(5000, () => new PollyCircuitBreakingDelegatingHandler(qosProvider, logger));
-
-            return this;
-        }  
-
-        public IHttpClient Create(bool useCookies, bool allowAutoRedirect)
-        {
-            var httpclientHandler = new HttpClientHandler { AllowAutoRedirect = allowAutoRedirect, UseCookies = useCookies};
-            
-            var client = new HttpClient(CreateHttpMessageHandler(httpclientHandler));                
-            
-            return new HttpClientWrapper(client);
+            _factory = factory;
+            _cacheHandlers = cacheHandlers;
+            _logger = logger;
         }
 
-        private HttpMessageHandler CreateHttpMessageHandler(HttpMessageHandler httpMessageHandler)
-        {            
-            _handlers
-                .OrderByDescending(handler => handler.Key)
-                .Select(handler => handler.Value)
+        public IHttpClient Create(DownstreamContext request)
+        {
+            _cacheKey = GetCacheKey(request);
+
+            var httpClient = _cacheHandlers.Get(_cacheKey);
+
+            if (httpClient != null)
+            {
+                return httpClient;
+            }
+
+            _httpclientHandler = new HttpClientHandler
+            {
+                AllowAutoRedirect = request.DownstreamReRoute.HttpHandlerOptions.AllowAutoRedirect,
+                UseCookies = request.DownstreamReRoute.HttpHandlerOptions.UseCookieContainer,
+                CookieContainer = new CookieContainer()
+            };
+
+            _httpClient = new HttpClient(CreateHttpMessageHandler(_httpclientHandler, request.DownstreamReRoute));
+
+            _client = new HttpClientWrapper(_httpClient);
+
+            return _client;
+        }
+
+        public void Save()
+        {
+            _cacheHandlers.Set(_cacheKey, _client, TimeSpan.FromHours(24));
+        }
+
+        private HttpMessageHandler CreateHttpMessageHandler(HttpMessageHandler httpMessageHandler, DownstreamReRoute request)
+        {
+            //todo handle error
+            var handlers = _factory.Get(request).Data;
+
+            handlers
+                .Select(handler => handler)
                 .Reverse()
                 .ToList()
                 .ForEach(handler =>
@@ -44,23 +75,12 @@ namespace Ocelot.Requester
                 });
             return httpMessageHandler;
         }
-    }
 
-    /// <summary>
-    /// This class was made to make unit testing easier when HttpClient is used.
-    /// </summary>
-    internal class HttpClientWrapper : IHttpClient
-    {
-        public HttpClient Client { get; }
-
-        public HttpClientWrapper(HttpClient client)
+        private string GetCacheKey(DownstreamContext request)
         {
-            Client = client;
-        }
+            var baseUrl = $"{request.DownstreamRequest.RequestUri.Scheme}://{request.DownstreamRequest.RequestUri.Authority}{request.DownstreamRequest.RequestUri.AbsolutePath}";
 
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
-        {
-            return Client.SendAsync(request);
+            return baseUrl;
         }
     }
 }

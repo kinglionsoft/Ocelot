@@ -50,12 +50,11 @@ namespace Ocelot.Responder
                 httpContext.Response.StatusCode = (int)response.StatusCode;
 
                 return Task.CompletedTask;
-
             }, context);
 
             using (Stream stream = new MemoryStream(content))
             {
-                if (response.StatusCode != HttpStatusCode.NotModified)
+                if (response.StatusCode != HttpStatusCode.NotModified && context.Response.ContentLength != 0)
                 {
                     await stream.CopyToAsync(context.Response.Body);
                 }

@@ -17,8 +17,7 @@ namespace Ocelot.LoadBalancer.LoadBalancers
             _services = services;
         }
 
-
-        public async Task<Response<HostAndPort>> Lease()
+        public async Task<Response<ServiceHostAndPort>> Lease()
         {
             var services = await _services.Invoke();
             if (_last >= services.Count)
@@ -28,10 +27,10 @@ namespace Ocelot.LoadBalancer.LoadBalancers
 
             var next = await Task.FromResult(services[_last]);
             _last++;
-            return new OkResponse<HostAndPort>(next.HostAndPort);
+            return new OkResponse<ServiceHostAndPort>(next.HostAndPort);
         }
 
-        public void Release(HostAndPort hostAndPort)
+        public void Release(ServiceHostAndPort hostAndPort)
         {
         }
     }

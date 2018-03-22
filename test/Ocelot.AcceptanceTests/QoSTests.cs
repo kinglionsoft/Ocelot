@@ -36,8 +36,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51892,
+                            }
+                        },
                         UpstreamPathTemplate = "/",
                         UpstreamHttpMethod = new List<string> { "Get" },
                         QoSOptions = new FileQoSOptions
@@ -45,13 +51,12 @@ namespace Ocelot.AcceptanceTests
                             ExceptionsAllowedBeforeBreaking = 1,
                             TimeoutValue = 500,
                             DurationOfBreak = 1000
-                        },
-                        
+                        },                        
                     }
                 }
             };
 
-            this.Given(x => x.GivenThereIsAPossiblyBrokenServiceRunningOn("http://localhost:51879", "Hello from Laura"))
+            this.Given(x => x.GivenThereIsAPossiblyBrokenServiceRunningOn("http://localhost:51892", "Hello from Laura"))
                 .Given(x => _steps.GivenThereIsAConfiguration(configuration))
                 .Given(x => _steps.GivenOcelotIsRunning())
                 .When(x => _steps.WhenIGetUrlOnTheApiGateway("/"))
@@ -81,8 +86,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51872,
+                            }
+                        },
                         UpstreamPathTemplate = "/",
                         UpstreamHttpMethod = new List<string> { "Get" },
                         QoSOptions = new FileQoSOptions
@@ -96,15 +107,21 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51880,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51880,
+                            }
+                        },
                         UpstreamPathTemplate = "/working",
                         UpstreamHttpMethod = new List<string> { "Get" },
                     }
                 }
             };
 
-            this.Given(x => x.GivenThereIsAPossiblyBrokenServiceRunningOn("http://localhost:51879", "Hello from Laura"))
+            this.Given(x => x.GivenThereIsAPossiblyBrokenServiceRunningOn("http://localhost:51872", "Hello from Laura"))
                 .And(x => x.GivenThereIsAServiceRunningOn("http://localhost:51880/", 200, "Hello from Tom"))
                 .And(x => _steps.GivenThereIsAConfiguration(configuration))
                 .And(x => _steps.GivenOcelotIsRunning())

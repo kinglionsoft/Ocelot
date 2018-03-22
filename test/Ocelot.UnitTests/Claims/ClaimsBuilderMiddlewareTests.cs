@@ -1,9 +1,10 @@
-﻿namespace Ocelot.UnitTests.Claims
+﻿using Ocelot.Middleware;
+
+namespace Ocelot.UnitTests.Claims
 {
     using System.Collections.Generic;
-    using Microsoft.AspNetCore.Builder;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.DependencyInjection;
     using Moq;
     using Ocelot.Claims;
     using Ocelot.Claims.Middleware;
@@ -16,16 +17,24 @@
     using TestStack.BDDfy;
     using Xunit;
 
-    public class ClaimsBuilderMiddlewareTests : ServerHostedMiddlewareTest
+    public class ClaimsBuilderMiddlewareTests
     {
         private readonly Mock<IAddClaimsToRequest> _addHeaders;
-        private Response<DownstreamRoute> _downstreamRoute;
+        private Mock<IOcelotLoggerFactory> _loggerFactory;
+        private Mock<IOcelotLogger> _logger;
+        private readonly ClaimsBuilderMiddleware _middleware;
+        private readonly DownstreamContext _downstreamContext;
+        private OcelotRequestDelegate _next;
 
         public ClaimsBuilderMiddlewareTests()
         {
             _addHeaders = new Mock<IAddClaimsToRequest>();
-
-            GivenTheTestServerIsConfigured();
+            _downstreamContext = new DownstreamContext(new DefaultHttpContext());
+            _loggerFactory = new Mock<IOcelotLoggerFactory>();
+            _logger = new Mock<IOcelotLogger>();
+            _loggerFactory.Setup(x => x.CreateLogger<ClaimsBuilderMiddleware>()).Returns(_logger.Object);
+            _next = context => Task.CompletedTask;
+            _middleware = new ClaimsBuilderMiddleware(_next, _loggerFactory.Object, _addHeaders.Object);
         }
 
         [Fact]
@@ -33,11 +42,14 @@
         {
             var downstreamRoute = new DownstreamRoute(new List<PlaceholderNameAndValue>(),
                 new ReRouteBuilder()
-                    .WithDownstreamPathTemplate("any old string")
-                    .WithClaimsToClaims(new List<ClaimToThing>
-                    {
-                        new ClaimToThing("sub", "UserType", "|", 0)
-                    })
+                    .WithDownstreamReRoute(new DownstreamReRouteBuilder()
+                        .WithDownstreamPathTemplate("any old string")
+                        .WithClaimsToClaims(new List<ClaimToThing>
+                        {
+                            new ClaimToThing("sub", "UserType", "|", 0)
+                        })
+                        .WithUpstreamHttpMethod(new List<string> { "Get" })
+                        .Build())
                     .WithUpstreamHttpMethod(new List<string> { "Get" })
                     .Build());
 
@@ -48,25 +60,15 @@
                 .BDDfy();
         }
 
-        protected override void GivenTheTestServerServicesAreConfigured(IServiceCollection services)
+        private void WhenICallTheMiddleware()
         {
-            services.AddSingleton<IOcelotLoggerFactory, AspDotNetLoggerFactory>();
-            services.AddLogging();
-            services.AddSingleton(_addHeaders.Object);
-            services.AddSingleton(ScopedRepository.Object);
-        }
-
-        protected override void GivenTheTestServerPipelineIsConfigured(IApplicationBuilder app)
-        {
-            app.UseClaimsBuilderMiddleware();
+            _middleware.Invoke(_downstreamContext).GetAwaiter().GetResult();
         }
 
         private void GivenTheDownStreamRouteIs(DownstreamRoute downstreamRoute)
         {
-            _downstreamRoute = new OkResponse<DownstreamRoute>(downstreamRoute);
-            ScopedRepository
-                .Setup(x => x.Get<DownstreamRoute>(It.IsAny<string>()))
-                .Returns(_downstreamRoute);
+            _downstreamContext.TemplatePlaceholderNameAndValues = downstreamRoute.TemplatePlaceholderNameAndValues;
+            _downstreamContext.DownstreamReRoute = downstreamRoute.ReRoute.DownstreamReRoute[0];
         }
 
         private void GivenTheAddClaimsToRequestReturns()

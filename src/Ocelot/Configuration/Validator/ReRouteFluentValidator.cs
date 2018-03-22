@@ -52,8 +52,13 @@ namespace Ocelot.Configuration.Validator
                 });
 
             When(reRoute => !reRoute.UseServiceDiscovery, () => {
-                RuleFor(r => r.DownstreamHost).NotEmpty().WithMessage("When not using service discover DownstreamHost must be set or Ocelot cannot find your service!");
-                });
+                RuleFor(r => r.DownstreamHostAndPorts).NotEmpty().WithMessage("When not using service discovery DownstreamHostAndPorts must be set and not empty or Ocelot cannot find your service!");
+            });
+
+            When(reRoute => !reRoute.UseServiceDiscovery, () => {
+                RuleFor(reRoute => reRoute.DownstreamHostAndPorts)
+                    .SetCollectionValidator(new HostAndPortValidator());
+            });
         }
 
         private async Task<bool> IsSupportedAuthenticationProviders(FileAuthenticationOptions authenticationOptions, CancellationToken cancellationToken)
@@ -62,6 +67,7 @@ namespace Ocelot.Configuration.Validator
             {
                 return true;
             }
+
             var schemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
 
             var supportedSchemes = schemes.Select(scheme => scheme.Name).ToList();

@@ -33,6 +33,8 @@
         UnmappableRequestError,
         RateLimitOptionsError,
         PathTemplateDoesntStartWithForwardSlash,
-        FileValidationFailedError
+        FileValidationFailedError,
+        UnableToFindDelegatingHandlerProviderError,
+        CouldNotFindPlaceholderError
     }
 }

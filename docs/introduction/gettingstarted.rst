@@ -9,7 +9,7 @@ built to netcoreapp2.0 `this <https://docs.microsoft.com/en-us/dotnet/articles/s
 
 **Install NuGet package**
 
-Install Ocelot and it's dependecies using nuget. You will need to create a netcoreapp2.0 projct and bring the package into it. Then follow the Startup below and :doc:`../features/configuration` sections
+Install Ocelot and it's dependecies using nuget. You will need to create a netcoreapp2.0 project and bring the package into it. Then follow the Startup below and :doc:`../features/configuration` sections
 to get up and running.
 
    ``Install-Package Ocelot``
@@ -24,13 +24,21 @@ The following is a very basic configuration.json. It won't do anything but shoul
 
     {
         "ReRoutes": [],
-        "GlobalConfiguration": {}
+        "GlobalConfiguration": {
+            "BaseUrl": "https://api.mybusiness.com"
+        }
     }
+
+The most important thing to note here is BaseUrl. Ocelot needs to know the URL it is running under
+in order to do Header find & replace and for certain administration configurations. When setting this URL it should be the external URL that clients will see Ocelot running on e.g. If you are running containers Ocelot might run on the url http://123.12.1.1:6543 but has something like nginx in front of it responding on https://api.mybusiness.com. In this case the Ocelot base url should be https://api.mybusiness.com. 
+
+If for some reason you are using containers and do want Ocelot to respond to client on http://123.12.1.1:6543
+then you can do this but if you are deploying multiple Ocelot's you will probably want to pass this on the command line in some kind of script. Hopefully whatever scheduler you are using can pass the IP.
 
 **Program**
 
-Then in your Program.cs you will want to have the following. This can be changed if you 
-don't wan't to use the default url e.g. UseUrls(someUrls) and should work as long as you keep the WebHostBuilder registration.
+Then in your Program.cs you will want to have the following. The main things to note are 
+AddOcelot() (adds ocelot services), UseOcelot().Wait() (sets up all the Ocelot middleware).
 
 .. code-block:: csharp
 
@@ -38,51 +46,32 @@ don't wan't to use the default url e.g. UseUrls(someUrls) and should work as lon
     {
         public static void Main(string[] args)
         {
-            IWebHostBuilder builder = new WebHostBuilder();
-            builder.ConfigureServices(s => {
-                s.AddSingleton(builder);
-            });
-            builder.UseKestrel()
+             new WebHostBuilder()
+                .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    config.SetBasePath(hostingContext.HostingEnvironment.ContentRootPath);
-                    var env = hostingContext.HostingEnvironment;
-                    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                        .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-                    config.AddJsonFile("configuration.json");
-                    config.AddEnvironmentVariables();
+                    config
+                        .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
+                        .AddJsonFile("appsettings.json", true, true)
+                        .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", true, true)
+                        .AddJsonFile("configuration.json")
+                        .AddEnvironmentVariables();
+                })
+                .ConfigureServices(s => {
+                    s.AddOcelot();
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {
-                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    logging.AddConsole();
+                    //add your logging
                 })
                 .UseIISIntegration()
-                .UseStartup<ManualTestStartup>();                
-            var host = builder.Build();
-            host.Run();
-        }
-    }
-
-Sadly we need to inject the IWebHostBuilder interface to get the applications scheme, url and port later. I cannot find a better way of doing this at the moment without setting this in a static or some kind of config.
-
-**Startup**
-
-An example startup using a json file for configuration can be seen below. This is the most basic startup and Ocelot has quite a few more options. Detailed in the rest of these docs! If you get a stuck a good place to look is at the ManualTests project in the source code.  
-
-.. code-block:: csharp
-
-    public class Startup
-    {
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddOcelot();
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseOcelot().Wait();
+                .Configure(app =>
+                {
+                    app.UseOcelot().Wait();
+                })
+                .Build()
+                .Run(); 
         }
     }
 
@@ -109,8 +98,7 @@ The following is a very basic configuration.json. It won't do anything but shoul
 
 **Program**
 
-Then in your Program.cs you will want to have the following. This can be changed if you 
-don't wan't to use the default url e.g. UseUrls(someUrls) and should work as long as you keep the WebHostBuilder registration.
+Then in your Program.cs you will want to have the following. 
 
 .. code-block:: csharp
 
@@ -121,7 +109,6 @@ don't wan't to use the default url e.g. UseUrls(someUrls) and should work as lon
             IWebHostBuilder builder = new WebHostBuilder();
             
             builder.ConfigureServices(s => {
-                s.AddSingleton(builder);
             });
 
             builder.UseKestrel()
@@ -133,8 +120,6 @@ don't wan't to use the default url e.g. UseUrls(someUrls) and should work as lon
             host.Run();
         }
     }
-
-Sadly we need to inject the IWebHostBuilder interface to get the applications scheme, url and port later. I cannot find a better way of doing this at the moment without setting this in a static or some kind of config.
 
 **Startup**
 

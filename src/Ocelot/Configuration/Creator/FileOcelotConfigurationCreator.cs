@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ocelot.Cache;
 using Ocelot.Configuration.Builder;
 using Ocelot.Configuration.File;
-using Ocelot.Configuration.Parser;
 using Ocelot.Configuration.Validator;
 using Ocelot.DependencyInjection;
-using Ocelot.LoadBalancer;
-using Ocelot.LoadBalancer.LoadBalancers;
 using Ocelot.Logging;
-using Ocelot.Requester.QoS;
 using Ocelot.Responses;
 
 namespace Ocelot.Configuration.Creator
@@ -37,7 +32,8 @@ namespace Ocelot.Configuration.Creator
         private readonly IRegionCreator _regionCreator;
         private readonly IHttpHandlerOptionsCreator _httpHandlerOptionsCreator;
         private readonly IAdministrationPath _adminPath;
-
+        private readonly IHeaderFindAndReplaceCreator _headerFAndRCreator;
+        private readonly IDownstreamAddressesCreator _downstreamAddressesCreator;
 
         public FileOcelotConfigurationCreator(
             IOptions<FileConfiguration> options, 
@@ -53,9 +49,13 @@ namespace Ocelot.Configuration.Creator
             IRateLimitOptionsCreator rateLimitOptionsCreator,
             IRegionCreator regionCreator,
             IHttpHandlerOptionsCreator httpHandlerOptionsCreator,
-            IAdministrationPath adminPath
+            IAdministrationPath adminPath,
+            IHeaderFindAndReplaceCreator headerFAndRCreator,
+            IDownstreamAddressesCreator downstreamAddressesCreator
             )
         {
+            _downstreamAddressesCreator = downstreamAddressesCreator;
+            _headerFAndRCreator = headerFAndRCreator;
             _adminPath = adminPath;
             _regionCreator = regionCreator;
             _rateLimitOptionsCreator = rateLimitOptionsCreator;
@@ -91,7 +91,16 @@ namespace Ocelot.Configuration.Creator
 
             foreach (var reRoute in fileConfiguration.ReRoutes)
             {
-                var ocelotReRoute = SetUpReRoute(reRoute, fileConfiguration.GlobalConfiguration);
+                var downstreamReRoute = SetUpDownstreamReRoute(reRoute, fileConfiguration.GlobalConfiguration);
+
+                var ocelotReRoute = SetUpReRoute(reRoute, downstreamReRoute);
+                
+                reRoutes.Add(ocelotReRoute);
+            }
+
+            foreach (var aggregate in fileConfiguration.Aggregates)
+            {
+                var ocelotReRoute = SetUpAggregateReRoute(reRoutes, aggregate, fileConfiguration.GlobalConfiguration);
                 reRoutes.Add(ocelotReRoute);
             }
 
@@ -102,7 +111,48 @@ namespace Ocelot.Configuration.Creator
             return new OkResponse<IOcelotConfiguration>(config);
         }
 
-        private ReRoute SetUpReRoute(FileReRoute fileReRoute, FileGlobalConfiguration globalConfiguration)
+        public ReRoute SetUpAggregateReRoute(List<ReRoute> reRoutes, FileAggregateReRoute aggregateReRoute, FileGlobalConfiguration globalConfiguration)
+        {
+            var applicableReRoutes = reRoutes
+                .SelectMany(x => x.DownstreamReRoute)
+                .Where(r => aggregateReRoute.ReRouteKeys.Contains(r.Key))
+                .ToList();
+
+            if(applicableReRoutes.Count != aggregateReRoute.ReRouteKeys.Count)
+            {
+                //todo - log or throw or return error whatever?
+            }
+
+            //make another re route out of these
+            var upstreamTemplatePattern = _upstreamTemplatePatternCreator.Create(aggregateReRoute);
+
+            var reRoute = new ReRouteBuilder()
+                .WithUpstreamPathTemplate(aggregateReRoute.UpstreamPathTemplate)
+                .WithUpstreamHttpMethod(aggregateReRoute.UpstreamHttpMethod)
+                .WithUpstreamTemplatePattern(upstreamTemplatePattern)
+                .WithDownstreamReRoutes(applicableReRoutes)
+                .WithUpstreamHost(aggregateReRoute.UpstreamHost)
+                .Build();
+
+            return reRoute;
+        }
+
+        private ReRoute SetUpReRoute(FileReRoute fileReRoute, DownstreamReRoute downstreamReRoutes)
+        {
+            var upstreamTemplatePattern = _upstreamTemplatePatternCreator.Create(fileReRoute);
+
+            var reRoute = new ReRouteBuilder()
+                .WithUpstreamPathTemplate(fileReRoute.UpstreamPathTemplate)
+                .WithUpstreamHttpMethod(fileReRoute.UpstreamHttpMethod)
+                .WithUpstreamTemplatePattern(upstreamTemplatePattern)
+                .WithDownstreamReRoute(downstreamReRoutes)
+                .WithUpstreamHost(fileReRoute.UpstreamHost)
+                .Build();
+
+            return reRoute;
+        }
+
+         private DownstreamReRoute SetUpDownstreamReRoute(FileReRoute fileReRoute, FileGlobalConfiguration globalConfiguration)
         {
             var fileReRouteOptions = _fileReRouteOptionsCreator.Create(fileReRoute);
 
@@ -128,7 +178,12 @@ namespace Ocelot.Configuration.Creator
 
             var httpHandlerOptions = _httpHandlerOptionsCreator.Create(fileReRoute);
 
-            var reRoute = new ReRouteBuilder()
+            var hAndRs = _headerFAndRCreator.Create(fileReRoute);
+
+            var downstreamAddresses = _downstreamAddressesCreator.Create(fileReRoute);
+
+            var reRoute = new DownstreamReRouteBuilder()
+                .WithKey(fileReRoute.Key)
                 .WithDownstreamPathTemplate(fileReRoute.DownstreamPathTemplate)
                 .WithUpstreamPathTemplate(fileReRoute.UpstreamPathTemplate)
                 .WithUpstreamHttpMethod(fileReRoute.UpstreamHttpMethod)
@@ -145,8 +200,7 @@ namespace Ocelot.Configuration.Creator
                 .WithCacheOptions(new CacheOptions(fileReRoute.FileCacheOptions.TtlSeconds, region))
                 .WithDownstreamScheme(fileReRoute.DownstreamScheme)
                 .WithLoadBalancer(fileReRoute.LoadBalancer)
-                .WithDownstreamHost(fileReRoute.DownstreamHost)
-                .WithDownstreamPort(fileReRoute.DownstreamPort)
+                .WithDownstreamAddresses(downstreamAddresses)
                 .WithReRouteKey(reRouteKey)
                 .WithIsQos(fileReRouteOptions.IsQos)
                 .WithQosOptions(qosOptions)
@@ -155,6 +209,11 @@ namespace Ocelot.Configuration.Creator
                 .WithHttpHandlerOptions(httpHandlerOptions)
                 .WithServiceName(fileReRoute.ServiceName)
                 .WithUseServiceDiscovery(fileReRoute.UseServiceDiscovery)
+                .WithUpstreamHeaderFindAndReplace(hAndRs.Upstream)
+                .WithDownstreamHeaderFindAndReplace(hAndRs.Downstream)
+                .WithUpstreamHost(fileReRoute.UpstreamHost)
+                .WithDelegatingHandlers(fileReRoute.DelegatingHandlers)
+                .WithAddHeadersToDownstream(hAndRs.AddHeadersToDownstream)
                 .Build();
 
             return reRoute;

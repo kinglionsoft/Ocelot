@@ -20,12 +20,10 @@ namespace Ocelot.AcceptanceTests
         private readonly Steps _steps;
          private int _counterOne;
 
-
         public ClientRateLimitTests()
         {
             _steps = new Steps();
         }
-
 
         public void Dispose()
         {
@@ -43,14 +41,20 @@ namespace Ocelot.AcceptanceTests
                         new FileReRoute
                         {
                             DownstreamPathTemplate = "/api/ClientRateLimit",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51876,
+                                }
+                            },
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
                             UpstreamPathTemplate = "/api/ClientRateLimit",
                             UpstreamHttpMethod = new List<string> { "Get" },
                             RequestIdKey = _steps.RequestIdKey,
                              
-                            RateLimitOptions =    new FileRateLimitRule()
+                            RateLimitOptions = new FileRateLimitRule()
                             {
                                 EnableRateLimiting = true,
                                 ClientWhitelist = new List<string>(),
@@ -69,13 +73,12 @@ namespace Ocelot.AcceptanceTests
                         QuotaExceededMessage = "",
                         RateLimitCounterPrefix = "",
                          HttpStatusCode = 428
-
                     },
                      RequestIdKey ="oceclientrequest"
                 }
             };
 
-            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51879", "/api/ClientRateLimit"))
+            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51876", "/api/ClientRateLimit"))
                 .And(x => _steps.GivenThereIsAConfiguration(configuration))
                 .And(x => _steps.GivenOcelotIsRunning())
                 .When(x => _steps.WhenIGetUrlOnTheApiGatewayMultipleTimesForRateLimit("/api/ClientRateLimit",1))
@@ -87,7 +90,6 @@ namespace Ocelot.AcceptanceTests
                 .BDDfy();
         }
 
-
         [Fact]
         public void should_call_middleware_withWhitelistClient()
         {
@@ -98,14 +100,20 @@ namespace Ocelot.AcceptanceTests
                         new FileReRoute
                         {
                             DownstreamPathTemplate = "/api/ClientRateLimit",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51876,
+                                }
+                            },
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
                             UpstreamPathTemplate = "/api/ClientRateLimit",
                             UpstreamHttpMethod = new List<string> { "Get" },
                             RequestIdKey = _steps.RequestIdKey,
 
-                            RateLimitOptions =    new FileRateLimitRule()
+                            RateLimitOptions = new FileRateLimitRule()
                             {
                                 EnableRateLimiting = true,
                                 ClientWhitelist = new List<string>() { "ocelotclient1"},
@@ -128,14 +136,13 @@ namespace Ocelot.AcceptanceTests
                 }
             };
 
-            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51879", "/api/ClientRateLimit"))
+            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51876", "/api/ClientRateLimit"))
                 .And(x => _steps.GivenThereIsAConfiguration(configuration))
                 .And(x => _steps.GivenOcelotIsRunning())
                 .When(x => _steps.WhenIGetUrlOnTheApiGatewayMultipleTimesForRateLimit("/api/ClientRateLimit", 4))
                 .Then(x => _steps.ThenTheStatusCodeShouldBe(200))
                 .BDDfy();
         }
-
 
         private void GivenThereIsAServiceRunningOn(string baseUrl, string basePath)
         {
@@ -160,7 +167,5 @@ namespace Ocelot.AcceptanceTests
 
             _builder.Start();
         }
-
-  
     }
 }

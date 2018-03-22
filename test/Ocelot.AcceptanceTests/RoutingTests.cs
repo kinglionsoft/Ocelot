@@ -44,10 +44,16 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
                             UpstreamPathTemplate = "/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            }
                         }
                     }
             };
@@ -72,8 +78,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51880,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51880,
+                                }
+                            },
                             UpstreamPathTemplate = "/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         },
@@ -81,8 +93,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -109,8 +127,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51880,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51880,
+                                }
+                            },
                             UpstreamPathTemplate = "/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         },
@@ -118,8 +142,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -146,8 +176,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51880,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51880,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         },
@@ -155,8 +191,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -183,8 +225,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -211,8 +259,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -239,8 +293,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/api/v1/vacancy",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51874,
+                            }
+                        },
                         UpstreamPathTemplate = "/vacancy/",
                         UpstreamHttpMethod = new List<string> { "Options",  "Put", "Get", "Post", "Delete" },
                         ServiceName = "botCore",
@@ -250,8 +310,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/api/v1/vacancy/{vacancyId}",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51874,
+                            }
+                        },
                         UpstreamPathTemplate = "/vacancy/{vacancyId}",
                         UpstreamHttpMethod = new List<string> { "Options",  "Put", "Get", "Post", "Delete" },
                         ServiceName = "botCore",
@@ -260,7 +326,7 @@ namespace Ocelot.AcceptanceTests
                 }
             };
 
-            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51879", "/api/v1/vacancy/1", 200, "Hello from Laura"))
+            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:51874", "/api/v1/vacancy/1", 200, "Hello from Laura"))
                 .And(x => _steps.GivenThereIsAConfiguration(configuration))
                 .And(x => _steps.GivenOcelotIsRunning())
                 .When(x => _steps.WhenIGetUrlOnTheApiGateway("/vacancy/1"))
@@ -280,8 +346,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/products",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -308,8 +380,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/products",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost/",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -336,8 +414,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/products",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/products/",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -364,8 +448,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/products",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/products",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -391,8 +481,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/products",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51879,
+                            }
+                        },
                         UpstreamPathTemplate = "/products/{productId}",
                         UpstreamHttpMethod = new List<string> { "Get" },
                         QoSOptions = new FileQoSOptions()
@@ -424,8 +520,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/products/{productId}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/products/{productId}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -441,7 +543,6 @@ namespace Ocelot.AcceptanceTests
                 .BDDfy();
         }
 
-
         [Fact]
         public void should_return_response_200_with_complex_url_that_starts_with_placeholder()
         {
@@ -453,8 +554,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/{variantId}/products/{productId}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/{variantId}/products/{productId}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -470,7 +577,6 @@ namespace Ocelot.AcceptanceTests
                 .BDDfy();
         }
 
-
         [Fact]
         public void should_not_add_trailing_slash_to_downstream_url()
         {
@@ -482,8 +588,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/products/{productId}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/products/{productId}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -508,8 +620,14 @@ namespace Ocelot.AcceptanceTests
                         new FileReRoute
                         {
                             DownstreamPathTemplate = "/",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             DownstreamScheme = "http",
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Post" },
@@ -538,8 +656,14 @@ namespace Ocelot.AcceptanceTests
                             DownstreamPathTemplate = "/newThing",
                             UpstreamPathTemplate = "/newThing",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
                     }
@@ -565,8 +689,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/{urlPath}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             UpstreamPathTemplate = "/myApp1Name/api/{urlPath}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                         }
@@ -592,8 +722,14 @@ namespace Ocelot.AcceptanceTests
                         new FileReRoute
                         {
                             DownstreamPathTemplate = "/",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             DownstreamScheme = "http",
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string> { "Get", "Post" },
@@ -620,8 +756,14 @@ namespace Ocelot.AcceptanceTests
                         new FileReRoute
                         {
                             DownstreamPathTemplate = "/",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51879,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51879,
+                                }
+                            },
                             DownstreamScheme = "http",
                             UpstreamPathTemplate = "/",
                             UpstreamHttpMethod = new List<string>(),
@@ -649,8 +791,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/api/v1/vacancy",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51879,
+                            }
+                        },
                         UpstreamPathTemplate = "/vacancy/",
                         UpstreamHttpMethod = new List<string> { "Options",  "Put", "Get", "Post", "Delete" },
                         ServiceName = "botCore",
@@ -660,8 +808,14 @@ namespace Ocelot.AcceptanceTests
                     {
                         DownstreamPathTemplate = "/api/v1/vacancy/{vacancyId}",
                         DownstreamScheme = "http",
-                        DownstreamHost = "localhost",
-                        DownstreamPort = 51879,
+                        DownstreamHostAndPorts = new List<FileHostAndPort>
+                        {
+                            new FileHostAndPort
+                            {
+                                Host = "localhost",
+                                Port = 51879,
+                            }
+                        },
                         UpstreamPathTemplate = "/vacancy/{vacancyId}",
                         UpstreamHttpMethod = new List<string> { "Options",  "Put", "Get", "Post", "Delete" },
                         ServiceName = "botCore",
@@ -678,7 +832,6 @@ namespace Ocelot.AcceptanceTests
                 .BDDfy();
         }
 
-
         [Fact]
         public void should_fix_145()
         {
@@ -690,8 +843,14 @@ namespace Ocelot.AcceptanceTests
                         {
                             DownstreamPathTemplate = "/api/{url}",
                             DownstreamScheme = "http",
-                            DownstreamHost = "localhost",
-                            DownstreamPort = 51899,
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 51899,
+                                }
+                            },
                             UpstreamPathTemplate = "/platform/{url}",
                             UpstreamHttpMethod = new List<string> { "Get" },
                             QoSOptions = new FileQoSOptions {
@@ -710,6 +869,105 @@ namespace Ocelot.AcceptanceTests
                 .Then(x => _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK))
                 .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
                 .And(x => ThenTheDownstreamUrlPathShouldBe("/api/swagger/lib/backbone-min.js"))
+                .BDDfy();
+        }
+
+        [Fact]
+        public void should_use_priority()
+        {
+            var configuration = new FileConfiguration
+            {
+                ReRoutes = new List<FileReRoute>
+                    {
+                        new FileReRoute
+                        {
+                            DownstreamPathTemplate = "/goods/{url}",
+                            DownstreamScheme = "http",
+                            UpstreamPathTemplate = "/goods/{url}",
+                            UpstreamHttpMethod = new List<string> { "Get" },
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 53879,
+                                }
+                            },
+                            Priority = 0
+                        },
+                        new FileReRoute
+                        {
+                            DownstreamPathTemplate = "/goods/delete",
+                            DownstreamScheme = "http",
+                            UpstreamPathTemplate = "/goods/delete",
+                            UpstreamHttpMethod = new List<string> { "Get" },
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 52879,
+                                }
+                            },
+                        }
+                    }
+            };
+
+            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:52879/", "/goods/delete", 200, "Hello from Laura"))
+                .And(x => _steps.GivenThereIsAConfiguration(configuration))
+                .And(x => _steps.GivenOcelotIsRunning())
+                .When(x => _steps.WhenIGetUrlOnTheApiGateway("/goods/delete"))
+                .Then(x => _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK))
+                .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
+                .BDDfy();
+        }
+
+        [Fact]
+        public void should_fix_issue_271()
+        {
+            var configuration = new FileConfiguration
+            {
+                ReRoutes = new List<FileReRoute>
+                    {
+                        new FileReRoute
+                        {
+                            DownstreamPathTemplate = "/api/v1/{everything}",
+                            DownstreamScheme = "http",
+                            UpstreamPathTemplate = "/api/v1/{everything}",
+                            UpstreamHttpMethod = new List<string> { "Get", "Put", "Post" },
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 54879,
+                                }
+                            },
+                        },
+                        new FileReRoute
+                        {
+                            DownstreamPathTemplate = "/connect/token",
+                            DownstreamScheme = "http",
+                            UpstreamPathTemplate = "/connect/token",
+                            UpstreamHttpMethod = new List<string> { "Post" },
+                            DownstreamHostAndPorts = new List<FileHostAndPort>
+                            {
+                                new FileHostAndPort
+                                {
+                                    Host = "localhost",
+                                    Port = 5001,
+                                }
+                            },
+                        }
+                    }
+            };
+
+            this.Given(x => x.GivenThereIsAServiceRunningOn("http://localhost:54879/", "/api/v1/modules/Test", 200, "Hello from Laura"))
+                .And(x => _steps.GivenThereIsAConfiguration(configuration))
+                .And(x => _steps.GivenOcelotIsRunning())
+                .When(x => _steps.WhenIGetUrlOnTheApiGateway("/api/v1/modules/Test"))
+                .Then(x => _steps.ThenTheStatusCodeShouldBe(HttpStatusCode.OK))
+                .And(x => _steps.ThenTheResponseBodyShouldBe("Hello from Laura"))
                 .BDDfy();
         }
 

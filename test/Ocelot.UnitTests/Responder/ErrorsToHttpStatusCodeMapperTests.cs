@@ -42,9 +42,8 @@ namespace Ocelot.UnitTests.Responder
         [InlineData(OcelotErrorCode.RequestTimedOutError)]
         public void should_return_service_unavailable(OcelotErrorCode errorCode)
         {
-            ShouldMapErrorToStatusCode(OcelotErrorCode.RequestTimedOutError, HttpStatusCode.ServiceUnavailable);
+            ShouldMapErrorToStatusCode(errorCode, HttpStatusCode.ServiceUnavailable);
         }
-
 
         [Theory]
         [InlineData(OcelotErrorCode.CannotAddDataError)]
@@ -121,7 +120,7 @@ namespace Ocelot.UnitTests.Responder
             // If this test fails then it's because the number of error codes has changed.
             // You should make the appropriate changes to the test cases here to ensure
             // they cover all the error codes, and then modify this assertion.
-            Enum.GetNames(typeof(OcelotErrorCode)).Length.ShouldBe(32, "Looks like the number of error codes has changed. Do you need to modify ErrorsToHttpStatusCodeMapper?");
+            Enum.GetNames(typeof(OcelotErrorCode)).Length.ShouldBe(34, "Looks like the number of error codes has changed. Do you need to modify ErrorsToHttpStatusCodeMapper?");
         }
 
         private void ShouldMapErrorToStatusCode(OcelotErrorCode errorCode, HttpStatusCode expectedHttpStatusCode)

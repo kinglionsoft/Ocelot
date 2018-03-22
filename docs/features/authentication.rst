@@ -22,13 +22,17 @@ We then map this to a ReRoute in the configuration e.g.
 .. code-block:: json
 
     "ReRoutes": [{
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 51876,
+                }
+            ],
             "DownstreamPathTemplate": "/",
             "UpstreamPathTemplate": "/",
             "UpstreamHttpMethod": ["Post"],
             "ReRouteIsCaseSensitive": false,
             "DownstreamScheme": "http",
-            "DownstreamHost": "localhost",
-            "DownstreamPort": 51876,
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "TestKey",
                 "AllowedScopes": []
@@ -59,7 +63,7 @@ If you want to authenticate using JWT tokens maybe from a provider like Auth0 yo
                 x.Audience = "test";
             });
 
-        services.AddOcelot(Configuration);
+        services.AddOcelot();
     }
 
 Then map the authentication provider key to a ReRoute in your configuration e.g.
@@ -67,13 +71,17 @@ Then map the authentication provider key to a ReRoute in your configuration e.g.
 .. code-block:: json
 
     "ReRoutes": [{
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 51876,
+                }
+            ],
             "DownstreamPathTemplate": "/",
             "UpstreamPathTemplate": "/",
             "UpstreamHttpMethod": ["Post"],
             "ReRouteIsCaseSensitive": false,
             "DownstreamScheme": "http",
-            "DownstreamHost": "localhost",
-            "DownstreamPort": 51876,
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "TestKey",
                 "AllowedScopes": []
@@ -103,7 +111,7 @@ In order to use IdentityServer bearer tokens register your IdentityServer servic
         services.AddAuthentication()
             .AddIdentityServerAuthentication(authenticationProviderKey, options);
 
-        services.AddOcelot(Configuration);
+        services.AddOcelot();
     }
 
 Then map the authentication provider key to a ReRoute in your configuration e.g.
@@ -111,15 +119,26 @@ Then map the authentication provider key to a ReRoute in your configuration e.g.
 .. code-block:: json
 
     "ReRoutes": [{
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 51876,
+                }
+            ],
             "DownstreamPathTemplate": "/",
             "UpstreamPathTemplate": "/",
             "UpstreamHttpMethod": ["Post"],
             "ReRouteIsCaseSensitive": false,
             "DownstreamScheme": "http",
-            "DownstreamHost": "localhost",
-            "DownstreamPort": 51876,
             "AuthenticationOptions": {
                 "AuthenticationProviderKey": "TestKey",
                 "AllowedScopes": []
             }
         }]
+
+Allowed Scopes
+^^^^^^^^^^^^^
+
+If you add scopes to AllowedScopes Ocelot will get all the user claims (from the token) of the type scope and make sure that the user has all of the scopes in the list.
+
+This is a way to restrict access to a ReRoute on a per scope basis.

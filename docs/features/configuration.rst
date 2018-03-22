@@ -14,15 +14,6 @@ if you don't want to manage lots of ReRoute specific settings.
         "GlobalConfiguration": {}
     }
 
-Follow Redirects / Use CookieContainer 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use HttpHandlerOptions in ReRoute configuration to set up HttpHandler behavior:
-- _AllowAutoRedirect_ is a value that indicates whether the request should follow redirection responses.
-Set it true if the request should automatically follow redirection responses from the Downstream resource; otherwise false. The default value is true.
-- _UseCookieContainer_ is a value that indicates whether the handler uses the CookieContainer property to store server cookies and uses these cookies when sending requests.
-The default value is true.
-
 Here is an example ReRoute configuration, You don't need to set all of these things but this is everything that is available at the moment:
 
 .. code-block:: json
@@ -45,8 +36,12 @@ Here is an example ReRoute configuration, You don't need to set all of these thi
             "ReRouteIsCaseSensitive": false,
             "ServiceName": "",
             "DownstreamScheme": "http",
-            "DownstreamHost": "localhost",
-            "DownstreamPort": 51779,
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "localhost",
+                    "Port": 51876,
+                }
+            ],
             "QoSOptions": {
                 "ExceptionsAllowedBeforeBreaking": 0,
                 "DurationOfBreak": 0,
@@ -66,12 +61,52 @@ Here is an example ReRoute configuration, You don't need to set all of these thi
             },
             "HttpHandlerOptions": {
                 "AllowAutoRedirect": true,
-                "UseCookieContainer": true
+                "UseCookieContainer": true,
+                "UseTracing": true
             },
             "UseServiceDiscovery": false
         }
 
 More information on how to use these options is below..
+
+Follow Redirects / Use CookieContainer 
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use HttpHandlerOptions in ReRoute configuration to set up HttpHandler behavior:
+
+1. AllowAutoRedirect is a value that indicates whether the request should follow redirection responses. Set it true if the request should automatically 
+follow redirection responses from the Downstream resource; otherwise false. The default value is false.
+2. UseCookieContainer is a value that indicates whether the handler uses the CookieContainer 
+property to store server cookies and uses these cookies when sending requests. The default value is false. Please note
+that if you are using the CookieContainer Ocelot caches the HttpClient for each downstream service. This means that all requests
+to that DownstreamService will share the same cookies. `Issue 274 <https://github.com/ThreeMammals/Ocelot/issues/274>`_ was created because a user
+noticed that the cookies were being shared. I tried to think of a nice way to handle this but I think it is impossible. If you don't cache the clients
+that means each request gets a new client and therefore a new cookie container. If you clear the cookies from the cached client container you get race conditions due to inflight
+requests. This would also mean that subsequent requests dont use the cookies from the previous response! All in all not a great situation. I would avoid setting 
+UseCookieContainer to true unless you have a really really good reason. Just look at your response headers and forward the cookies back with your next request! 
+
+Multiple environments
+^^^^^^^^^^^^^^^^^^^^^
+
+Like any other asp.net core project Ocelot supports configuration file names such as configuration.dev.json, configuration.test.json etc. In order to implement this add the following 
+to you 
+
+.. code-block:: csharp
+
+        .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config
+                        .SetBasePath(hostingContext.HostingEnvironment.ContentRootPath)
+                        .AddJsonFile("appsettings.json", true, true)
+                        .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", true, true)
+                        .AddJsonFile("configuration.json")
+                        .AddJsonFile($"configuration.{hostingContext.HostingEnvironment.EnvironmentName}.json")
+                        .AddEnvironmentVariables();
+                })
+
+Ocelot should now use the environment specific configuration and fall back to configuration.json if there isnt one.
+
+You also need to set the corresponding environment variable which is ASPNETCORE_ENVIRONMENT. More info on this can be found in the `asp.net core docs <https://docs.microsoft.com/en-us/aspnet/core/fundamentals/environments>`_.
 
 Store configuration in consul
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -81,7 +116,7 @@ If you add the following when you register your services Ocelot will attempt to 
 .. code-block:: csharp
 
  services
-    .AddOcelot(Configuration)
+    .AddOcelot()
     .AddStoreOcelotConfigurationInConsul();
 
 You also need to add the following to your configuration.json. This is how Ocelot

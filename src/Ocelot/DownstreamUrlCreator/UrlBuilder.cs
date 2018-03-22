@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Collections.Generic;
 using Ocelot.Errors;
 using Ocelot.Responses;
@@ -8,7 +9,7 @@ namespace Ocelot.DownstreamUrlCreator
 {
     public class UrlBuilder : IUrlBuilder
     {
-        public Response<DownstreamUrl> Build(string downstreamPath, string downstreamScheme, HostAndPort downstreamHostAndPort)
+        public Response<DownstreamUrl> Build(string downstreamPath, string downstreamScheme, ServiceHostAndPort downstreamHostAndPort)
         {
             if (string.IsNullOrEmpty(downstreamPath))
             {
@@ -25,12 +26,11 @@ namespace Ocelot.DownstreamUrlCreator
                 return new ErrorResponse<DownstreamUrl>(new List<Error> { new DownstreamHostNullOrEmptyError() });
             }
 
-
             var builder = new UriBuilder
             {
                 Host = downstreamHostAndPort.DownstreamHost,
                 Path = downstreamPath,
-                Scheme = downstreamScheme
+                Scheme = downstreamScheme,
             };
 
             if (downstreamHostAndPort.DownstreamPort > 0)
@@ -44,3 +44,4 @@ namespace Ocelot.DownstreamUrlCreator
         }
     }
 }
+*/

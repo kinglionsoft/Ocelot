@@ -12,7 +12,7 @@ namespace Ocelot.Configuration.Creator
         private const string RegExForwardSlashOnly = "^/$";
         private const string RegExForwardSlashAndOnePlaceHolder = "^/.*";
 
-        public UpstreamPathTemplate Create(FileReRoute reRoute)
+        public UpstreamPathTemplate Create(IReRoute reRoute)
         {
             var upstreamTemplate = reRoute.UpstreamPathTemplate;
 
@@ -42,7 +42,7 @@ namespace Ocelot.Configuration.Creator
 
             if (upstreamTemplate == "/")
             {
-                return new UpstreamPathTemplate(RegExForwardSlashOnly, 1);
+                return new UpstreamPathTemplate(RegExForwardSlashOnly, reRoute.Priority);
             }
 
             if(upstreamTemplate.EndsWith("/"))
@@ -54,7 +54,7 @@ namespace Ocelot.Configuration.Creator
                 ? $"^{upstreamTemplate}{RegExMatchEndString}" 
                 : $"^{RegExIgnoreCase}{upstreamTemplate}{RegExMatchEndString}";
 
-            return new UpstreamPathTemplate(route, 1);
+            return new UpstreamPathTemplate(route, reRoute.Priority);
         }
 
         private bool ForwardSlashAndOnePlaceHolder(string upstreamTemplate, List<string> placeholders, int postitionOfPlaceHolderClosingBracket)
@@ -66,7 +66,6 @@ namespace Ocelot.Configuration.Creator
 
             return false;
         }
-
 
         private bool IsPlaceHolder(string upstreamTemplate, int i)
         {

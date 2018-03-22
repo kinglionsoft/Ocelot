@@ -15,13 +15,14 @@ namespace Ocelot.LoadBalancer.LoadBalancers
             _services = services;
         }
 
-        public async Task<Response<HostAndPort>> Lease()
+        public async Task<Response<ServiceHostAndPort>> Lease()
         {
+            //todo no point spinning a task up here, also first or default could be null..
             var service = await Task.FromResult(_services.FirstOrDefault());
-            return new OkResponse<HostAndPort>(service.HostAndPort);
+            return new OkResponse<ServiceHostAndPort>(service.HostAndPort);
         }
 
-        public void Release(HostAndPort hostAndPort)
+        public void Release(ServiceHostAndPort hostAndPort)
         {
         }
     }

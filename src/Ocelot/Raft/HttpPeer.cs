@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Ocelot.Authentication;
 using Ocelot.Configuration;
 using Ocelot.Configuration.Provider;
+using Ocelot.Middleware;
 using Rafty.Concensus;
 using Rafty.FiniteStateMachine;
 
@@ -23,17 +24,17 @@ namespace Ocelot.Raft
         private IOcelotConfiguration _config;
         private IIdentityServerConfiguration _identityServerConfiguration;
 
-        public HttpPeer(string hostAndPort, HttpClient httpClient, IWebHostBuilder builder, IOcelotConfiguration config, IIdentityServerConfiguration identityServerConfiguration)
+        public HttpPeer(string hostAndPort, HttpClient httpClient, IBaseUrlFinder finder, IOcelotConfiguration config, IIdentityServerConfiguration identityServerConfiguration)
         {
             _identityServerConfiguration = identityServerConfiguration;
             _config = config;
-            Id  = hostAndPort;
+            Id = hostAndPort;
             _hostAndPort = hostAndPort;
             _httpClient = httpClient;
             _jsonSerializerSettings = new JsonSerializerSettings() { 
                 TypeNameHandling = TypeNameHandling.All
             };
-            _baseSchemeUrlAndPort = builder.GetSetting(WebHostDefaults.ServerUrlsKey);
+            _baseSchemeUrlAndPort = finder.Find();
         }
 
         public string Id {get; private set;}
@@ -67,6 +68,7 @@ namespace Ocelot.Raft
                 {
                     SetToken();
                 }                
+
                 var json = JsonConvert.SerializeObject(appendEntries, _jsonSerializerSettings);
                 var content = new StringContent(json);
                 content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -87,12 +89,14 @@ namespace Ocelot.Raft
             }
         }
 
-        public Response<T> Request<T>(T command) where T : ICommand
+        public Response<T> Request<T>(T command)
+            where T : ICommand
         {
             if(_token == null)
             {
                 SetToken();
             }   
+
             var json = JsonConvert.SerializeObject(command, _jsonSerializerSettings);
             var content = new StringContent(json);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
